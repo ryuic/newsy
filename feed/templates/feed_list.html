@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Feed listing{% endblock %}
+
+{% block content %}
+<h1>Feed listing</h1>
+<p><a href="{% url feed.views.create %}">Create feed</a></p>
+
+<table class="defaultTable">
+  {% for feed in object_list %}
+    <tr>
+      <td><a href="{% url feed.views.show key=feed.key %}" class="medium bold">{{ feed.name }}</a></td>
+      <td><a href="{% url feed.views.edit key=feed.key %}">Edit</a></td>
+      <td><a href="{% url feed.views.delete key=feed.key %}">Delete</a></td>
+    </tr>
+  {% endfor %}
+</table>
+
+<div>
+  {% if has_previous %}
+    <a href="{% url feed.views.index %}?page={{ previous }}">&lt;-previous</a>
+  {% endif %}
+  {% if has_next %}
+    <a href="{% url feed.views.index %}?page={{ next }}">next-&gt;</a>
+  {% endif %}
+</div>
+{% endblock %}

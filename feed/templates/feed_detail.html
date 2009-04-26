@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Person details{% endblock %}
+
+{% block content %}
+<h1>Feed details</h1>
+<a href="{% url feed.views.index %}">Back to listing</a>
+<a href="{% url feed.views.edit key=object.key %}">Edit</a>
+<a href="{% url feed.views.delete key=object.key %}">Delete</a>
+
+<ul>
+  <li>Feed Name: {{ object.name }}</li>
+  <li>Feed URL: <a href="{{ object.url }}" target="_blank">{{ object.url }}</a></a></li>
+</ul>
+{% endblock %}

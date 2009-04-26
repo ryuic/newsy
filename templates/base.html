@@ -1,0 +1,69 @@
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}"
+    xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
+    lang="{% firstof LANGUAGE_CODE 'en' %}">
+  <head>
+    <title>{% block title %}{% endblock %} - newsy</title>
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}combined-{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}.css" />
+    {% block css %}{% endblock %}
+    {% block extra-head %}{% endblock %}
+  </head>
+
+  <body>
+    <div id="main">
+      <div id="header">
+        <div class="navi">
+          {% if user.is_authenticated %}
+            Welcome, {{ user.username }}
+            {% if google_user %}<a href="{% google_logout_url "/" %}">
+            {% else %}<a href="/account/logout/">{% endif %}Logout</a>
+          {% else %}
+            <a href="/account/login/">Login</a>
+          {% endif %}
+        </div>
+        <div class="info">
+          <a href="/"><img src="{{ MEDIA_URL }}trend/img/logo.gif" alt="newsy" title="newsy" /></a>
+        </div>
+      </div>
+
+      <div id="container">
+        <div id="things">
+          {% block content %}asdf{% endblock %}
+        </div>
+      </div>
+
+      <div id="sidebar">
+        {% block sidebar %}{% endblock %}
+      </div>
+
+      <div id="footer">
+        <p>&copy; <a href="/">newsy</a></p>
+      </div>
+
+    </div>
+
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}combined-{{ LANGUAGE_CODE }}.js"></script>
+{% block js %}{% endblock %}
+<script type="text/javascript">
+  var keywords = "{{query|escape}}";
+</script>
+
+{% if not debug %}
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-785809-29");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+{% endif %}
+  </body>
+</html>
