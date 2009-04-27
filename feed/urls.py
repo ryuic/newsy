@@ -8,5 +8,6 @@ urlpatterns = patterns('feed.views',
     (r'^show/(?P<key>.+)$', 'show'),
     (r'^edit/(?P<key>.+)$', 'edit'),
     (r'^delete/(?P<key>.+)$', 'delete'),
+    (r'^crawl/', 'crawl'),
     #(r'^download/(?P<key>.+)/(?P<name>.+)$', 'download_file'),
 )

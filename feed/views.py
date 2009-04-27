@@ -10,6 +10,7 @@ from feed.models import *
 from ragendja.auth.decorators import staff_only
 from ragendja.dbutils import get_object_or_404
 from ragendja.template import render_to_response
+import datetime
 
 #@staff_only
 def index(request):
@@ -32,8 +33,12 @@ def delete(request, key):
 
 
 def crawl(request):
-    
-    return render_to_response(request, 'trend/generate.html', {'results' : results})
+    now = datetime.datetime.now()
+    hour = now.hour
+    feeds = Feed.all().filter('execute_times =', hour).fetch(100)
+
+    for feed in feeds:
+      title, wc = getwordcounts(feed.url)
 
 def generate(request):
     apcount = {}

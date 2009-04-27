@@ -6,6 +6,8 @@ from ragendja.dbutils import cleanup_relations
 class Feed(db.Model):
     name = db.StringProperty(required=True)
     url = db.LinkProperty(required=True)
+    execute_hour = db.ListProperty(item_type=int)
+    execute_minute = db.ListProperty(item_type=int)
     created_at = db.DateTimeProperty(auto_now_add = 1)
     updated_at = db.DateTimeProperty(auto_now_add = 1)
 

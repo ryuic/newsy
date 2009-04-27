@@ -11,3 +11,7 @@ handlers:
 
 - url: /.*
   script: common/appenginepatch/main.py
+
+- url: /feed/crawl
+  script: common/appenginepatch/main.py
+  login: admin
