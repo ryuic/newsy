@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
-{% block title %}Create feed{% endblock %}
+{% block title %}Create person{% endblock %}
 
 {% block content %}
-<h1>Create feed.</h1>
+<h1>Create person</h1>
 <a href="{% url feed.views.index %}">Back to listing</a>
 
 <form action="" method="post" enctype="multipart/form-data">
