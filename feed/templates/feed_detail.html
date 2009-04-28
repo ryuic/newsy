@@ -3,12 +3,18 @@
 
 {% block content %}
 <h1>Feed details</h1>
-<a href="{% url feed.views.index %}">Back to listing</a>
-<a href="{% url feed.views.edit key=object.key %}">Edit</a>
-<a href="{% url feed.views.delete key=object.key %}">Delete</a>
+
+<p>
+  <a href="{% url feed.views.index %}">Back to listing</a> | 
+  <a href="{% url feed.views.edit key=object.key %}">Edit</a> |
+  <a href="{% url feed.views.delete key=object.key %}">Delete</a>
+</p>
 
 <ul>
-  <li>Feed Name: {{ object.name }}</li>
-  <li>Feed URL: <a href="{{ object.url }}" target="_blank">{{ object.url }}</a></a></li>
+  <li>Feed Name: <span class="medium bold">{{ object.name }}</span></li>
+  <li>Feed URL: <a href="{{ object.url }}" target="_blank" class="green">{{ object.url }}</a></li>
+  <li>Crawl Execute Hours:{{ object.execute_hour|join:", " }}</li>
+  <li>Crawl Execute Minutes:{{ object.execute_minute|join:", " }}</li>
+
 </ul>
 {% endblock %}

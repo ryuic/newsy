@@ -11,6 +11,7 @@
       <td><a href="{% url feed.views.show key=feed.key %}" class="medium bold">{{ feed.name }}</a></td>
       <td><a href="{% url feed.views.edit key=feed.key %}">Edit</a></td>
       <td><a href="{% url feed.views.delete key=feed.key %}">Delete</a></td>
+      <td><a href="{% url feed.views.entry_list key=feed.key %}">Entries</a></td>
     </tr>
   {% endfor %}
 </table>

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Crawl feed{% endblock %}
+
+{% block content %}
+<h1>Crawl feed.</h1>
+<a href="{% url feed.views.index %}">Back to listing</a>
+
+<dl>
+  {% for r in results %}
+    <dt>{{ r.blog }}</dt>
+    <dd>{{ r.count|join:"," }}</dd>
+  {% endfor %}
+</dl>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Entry details{% endblock %}
+
+{% block content %}
+<h1>Entry details</h1>
+
+<p>
+  <a href="{% url feed.views.entry_list key=object.feed_ref.key %}">Back to listing</a> | 
+  <a href="{% url feed.views.entry_edit key=object.key %}">Edit</a> |
+  <a href="{% url feed.views.entry_delete key=object.key %}">Delete</a>
+</p>
+
+<ul>
+  <li>Entry Title: <span class="medium bold">{{ object.title }}</span></li>
+  <li>URL: <a href="{{ object.url }}" target="_blank" class="green">{{ object.url }}</a></li>
+  <li>Description: {{ object.description }}</li>
+  <li>
+    <ul>
+      {% for wl in object.wordlist_set %}
+        <li>{{ wl.word }}</li>
+      {% endfor %}
+    </ul>
+  </li>
+</ul>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Entry listing{% endblock %}
+
+{% block content %}
+<h1>Entry listing{% if feed %} | {{ feed.name }}{% endif %}</h1>
+
+<p><a href="{% url feed.views.index %}">Back to listing</a></p>
+
+<table class="defaultTable">
+  {% for entry in object_list %}
+    <tr>
+      <td><a href="{% url feed.views.entry_show key=entry.key %}" class="medium bold">{{ entry.title }}</a></td>
+      <td><a href="{% url feed.views.entry_edit key=entry.key %}">Edit</a></td>
+      <td><a href="{% url feed.views.entry_delete key=entry.key %}">Delete</a></td>
+    </tr>
+  {% endfor %}
+</table>
+
+<div>
+  {% if has_previous %}
+    <a href="{% url feed.views.entry_list %}?page={{ previous }}">&lt;-previous</a>
+  {% endif %}
+  {% if has_next %}
+    <a href="{% url feed.views.entry_list %}?page={{ next }}">next-&gt;</a>
+  {% endif %}
+</div>
+{% endblock %}

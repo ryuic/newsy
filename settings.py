@@ -45,6 +45,9 @@ CACHE_MIDDLEWARE_SECONDS = 3600
 USE_I18N = True
 LANGUAGE_CODE = 'en'
 
+#TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'Asia/Tokyo Japan'
+
 #Restrict supported languages (and JS media generation)
 #LANGUAGES = (
 #    ('de', 'German'),

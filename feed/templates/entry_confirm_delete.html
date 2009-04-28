@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Delete feed{% endblock %}
+
+{% block content %}
+<h1>Delete person</h1>
+<a href="{% url feed.views.entry_list key=object.key %}">Back to listing</a>
+<a href="{% url feed.views.entry_show key=object.key %}">Back to entry</a>
+
+<p>
+  Do you really want to delete <span class="bold">{{ object.title }}</span>?
+
+  <form action="" method="post">
+    <input type="submit" name="delete" value="Delete" class="standard" />
+  </form>
+</p>
+
+{% endblock %}
