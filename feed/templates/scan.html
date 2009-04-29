@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
-{% block title %}Crawl feed{% endblock %}
+{% block title %}Scan entries{% endblock %}
 
 {% block content %}
-<h1>Crawl feed.</h1>
+<h1>Scan entries.</h1>
 <a href="{% url feed.views.index %}">Back to listing</a>
 
+<p class="medium">Scanned</p>
 <dl>
   {% for e in entries %}
     <dt class="bold medium">{{ e.title }}</dt>
-    <dt><a href="{% url feed.views.show key=e.feed_ref.key %}" class="green">{{ e.url }}</a></dt>
+    <dt><a href="{% url feed.views.entry_show key=e.key %}" class="green">{{ e.url }}</a></dt>
   {% endfor %}
 </dl>
 

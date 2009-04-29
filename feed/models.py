@@ -26,11 +26,14 @@ class Entry(db.Model):
     url = db.LinkProperty()
     description = db.TextProperty()
     url_hash = db.StringProperty()
+    is_scanned = db.BooleanProperty(default = False)
     created_at = db.DateTimeProperty(auto_now_add = 1)
     updated_at = db.DateTimeProperty(auto_now_add = 1)
 
     def __unicode__(self):
         return self.feed_ref.name
+
+signals.pre_delete.connect(cleanup_relations, sender=Entry)
 
 class Word(db.Model):
     word = db.StringProperty()
@@ -42,6 +45,7 @@ class Word(db.Model):
 class WordList(db.Model):
     entry_ref = db.ReferenceProperty(Entry)
     word_ref = db.ReferenceProperty(Word)
+    apcount = db.IntegerProperty(default = 0)
 
     def __unicode__(self):
         return "[%s] %s" % (self.entry_ref.title, self.word_ref.word)
@@ -54,6 +58,16 @@ class Crawl(db.Model):
 
     def __unicode__(self):
         return self.feed_ref.name
+
+
+class FeatureCount(db.Model):
+    feature = db.StringProperty()
+    category = db.StringProperty()
+    count = db.IntegerProperty(default = 1)
+
+class CategoryCount(db.Model):
+    category = db.StringProperty()
+    count = db.IntegerProperty(default = 1)
 
 
 class EntryDuplicateError(Exception):
