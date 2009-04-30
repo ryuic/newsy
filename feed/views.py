@@ -86,8 +86,6 @@ def crawl(request):
                 if 'summary' in e: summary = e.summary
                 else: summary = e.description
 
-                if 'media' in e and 'description' in e['media']: summary += e.media.description
-
                 entry = Entry(
                     feed_ref = feed.key(),
                     title = e.title,
@@ -119,7 +117,7 @@ def scan(request):
     wordlist = []
     for w, bc in apcount.items():
         frac = float(bc) / len(entries)
-        if frac > 0.1 and frac < 0.8: wordlist.append(w)
+        if frac > 0.06 and frac < 0.4: wordlist.append(w)
 
     for entry, wc in wordcounts.items():
         for word, count in wc.items():
@@ -236,14 +234,20 @@ def _getwordcounts(feed, e):
 
 IGNOREWORDS = [
     'about',
+    'after',
     'almost',
     'also',
+    'been',
+    'before',
     'from',
     'have',
     'into',
     'just',
+    'know',
+    'like',
     'make',
     'more',
+    'should ',
     'some',
     'that',
     'their',
@@ -254,6 +258,7 @@ IGNOREWORDS = [
     'well',
     'were',
     'will',
+    'what ',
     'which',
     'with',
 ]
