@@ -53,6 +53,9 @@ def entry_edit(request, key):
     return update_object(request, object_id=key, form_class=EntryForm)
 
 def entry_delete(request, key):
+    wordlist = WordList.all().filter('entry_ref =', Entry.get(key)).fetch(1000)
+    for w in wordlist: w.delete()
+
     return delete_object(request, Entry, object_id=key,
         post_delete_redirect=reverse('feed.views.entry_list'))
 
@@ -117,7 +120,7 @@ def scan(request):
     wordlist = []
     for w, bc in apcount.items():
         frac = float(bc) / len(entries)
-        if frac > 0.06 and frac < 0.4: wordlist.append(w)
+        if frac > 1.0 and frac < 0.5: wordlist.append(w)
 
     for entry, wc in wordcounts.items():
         for word, count in wc.items():
@@ -171,7 +174,7 @@ def _crawl(request):
     wordlist = []
     for w, bc in apcount.items():
         frac = float(bc) / entry_count
-        if frac > 0.02 and frac < 0.9: wordlist.append(w)
+        if frac > 0.07 and frac < 0.9: wordlist.append(w)
 
     results = []
     for entry, wc in wordcounts.items():
@@ -239,14 +242,22 @@ IGNOREWORDS = [
     'also',
     'been',
     'before',
+    'could',
+    'didn',
+    'ever',
+    'first',
     'from',
     'have',
+    'here',
     'into',
     'just',
     'know',
     'like',
+    'logn',
+    'many',
     'make',
     'more',
+    'only',
     'should ',
     'some',
     'that',
@@ -254,18 +265,27 @@ IGNOREWORDS = [
     'these',
     'they',
     'this', 
+    'than',
+    'then',
+    'them',
+    'there',
     'those',
+    'time',
+    'very',
+    'wasnt',
     'well',
     'were',
     'will',
     'what ',
+    'when',
     'which',
     'with',
+    'would',
 ]
 
 def getwords(html):
     txt = re.compile(r'<[^>]+>').sub('', html)
     words = re.compile(r'[^A-Z^a-z]+').split(txt)
     return [word.lower() for word in words 
-        if word != '' and len(word) > 3 and not word in IGNOREWORDS]
+        if word != '' and len(word) > 3 and word not in IGNOREWORDS]
 
