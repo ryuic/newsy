@@ -5,6 +5,8 @@
 <h1>Crawl feed.</h1>
 <a href="{% url feed.views.index %}">Back to listing</a>
 
+<p>Crawled {{ entries|length }} entries.</p>
+
 <dl>
   {% for e in entries %}
     <dt class="bold medium">{{ e.title }}</dt>

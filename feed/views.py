@@ -44,7 +44,7 @@ def entry_list(request, key=None):
         payload['feed'] = feed
     entries.order('-created_at')
 
-    return object_list(request, entries, paginate_by=10, extra_context=payload)
+    return object_list(request, entries, paginate_by=25, extra_context=payload)
 
 def entry_show(request, key):
     return object_detail(request, Entry.all(), key)
@@ -55,6 +55,14 @@ def entry_edit(request, key):
 def entry_delete(request, key):
     return delete_object(request, Entry, object_id=key,
         post_delete_redirect=reverse('feed.views.entry_list'))
+
+def classify(request):
+    data = []
+    scanned_entries = Entry.all().filter('is_scan =', True).fetch(20)
+    for e in scanned_entries:
+        for wl in e.wordlist_set:
+            data.append([])
+    clusters.kcluster()
 
 def crawl(request):
     now = datetime.now()
@@ -78,6 +86,8 @@ def crawl(request):
                 if 'summary' in e: summary = e.summary
                 else: summary = e.description
 
+                if 'media' in e and 'description' in e['media']: summary += e.media.description
+
                 entry = Entry(
                     feed_ref = feed.key(),
                     title = e.title,
@@ -95,22 +105,17 @@ def crawl(request):
 
 def scan(request):
     entries = Entry.all().filter('is_scanned =', False).order('-created_at').fetch(15)
-    
-    apcount = {}
-    wordcounts = {}
-    
-    for e in entries:
-        try:
-            wc = getwordcounts(e)
-            wordcounts[e] = wc
+    wordcounts, apcount = {}, {}
 
-            #apcountの集計
-            for word, count in wc.items():
-                apcount.setdefault(word, 0)
-                if count > 1: apcount[word] += 1
-        except StandardError, inst:
-            logging.error('Failed to scan entry %s, %s' % (feed.url, inst))
-    
+    for e in entries:
+        wc = getwordcounts(e)
+        wordcounts[e] = wc
+
+        #apcountの集計
+        for word, count in wc.items():
+            apcount.setdefault(word, 0)
+            if count > 1: apcount[word] += 1
+
     wordlist = []
     for w, bc in apcount.items():
         frac = float(bc) / len(entries)
@@ -128,8 +133,6 @@ def scan(request):
             wl = WordList(entry_ref=entry, word_ref=w, apcount=count).save()
         entry.is_scanned = True
         entry.save()
-
-    logging.debug('Scanned %d' % len(entries))
 
     return render_to_response(request, 'feed/scan.html',  {'entries' : entries})
 
@@ -209,6 +212,7 @@ def _getwordcounts(feed, e):
     if entry:
         raise EntryDuplicateError, '%s has been already add.' % e.link
 
+    if 'media' in e: del e['media']
     if 'summary' in e: summary = e.summary
     else: summary = e.description
 
@@ -257,5 +261,6 @@ IGNOREWORDS = [
 def getwords(html):
     txt = re.compile(r'<[^>]+>').sub('', html)
     words = re.compile(r'[^A-Z^a-z]+').split(txt)
-    return [word.lower() for word in words if word != '' and len(word) > 3 and not word in IGNOREWORDS]
+    return [word.lower() for word in words 
+        if word != '' and len(word) > 3 and not word in IGNOREWORDS]
 

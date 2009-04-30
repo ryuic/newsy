@@ -12,6 +12,7 @@
       <td><a href="{% url feed.views.entry_show key=entry.key %}" class="medium bold">{{ entry.title }}</a></td>
       <td><a href="{% url feed.views.entry_edit key=entry.key %}">Edit</a></td>
       <td><a href="{% url feed.views.entry_delete key=entry.key %}">Delete</a></td>
+      <td>{{ entry.is_scanned }}</td>
     </tr>
   {% endfor %}
 </table>

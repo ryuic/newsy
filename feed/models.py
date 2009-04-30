@@ -32,6 +32,10 @@ class Entry(db.Model):
 
     def __unicode__(self):
         return self.feed_ref.name
+    
+    @permalink
+    def get_absolute_url(self):
+        return ('feed.views.entry_show', (), {'key': self.key()})
 
 signals.pre_delete.connect(cleanup_relations, sender=Entry)
 
