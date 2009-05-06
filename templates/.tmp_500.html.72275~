@@ -4,7 +4,7 @@
 {% block content %}
 
 <div style="">
-  <img src="/img/logo_large.gif" />
+  <img src="/media/img/logo_large.gif" />
   <p class="medium grey">There was an error while handling your request.</p>
 </div>
 

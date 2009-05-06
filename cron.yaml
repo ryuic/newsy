@@ -1,0 +1,5 @@
+cron:
+- description: feed crawl job
+  url: /feed/crawl/
+  schedule: every 15 minutes
+

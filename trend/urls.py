@@ -2,6 +2,5 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('trend.views',
-    (r'^$', 'index'),
-    (r'^list/$', 'list'),
+    (r'^$', 'list'),
 )

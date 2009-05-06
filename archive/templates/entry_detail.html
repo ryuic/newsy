@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}[{{ object.feed_ref.name }}] {{ object.title|safe }} / newsy{% endblock %}
+
+{% block content %}
+
+<h1 class="show"><a href="{{ object.url }}" target="_blank">{{ object.title|safe }}</a></h1>
+
+<div id="archive">
+  <p class="archiveInfo">
+    <a href="{% url archive.views.list cat=object.cat_ref.category %}" class="dark">{{ object.cat_ref.category }}</a>
+    <a href="{% url archive.views.list blog=object.feed_ref.key %}" class="light-grey">{{ object.feed_ref.name }}</a>
+  </p>
+
+  <div class="summary">
+    <p class="light-grey">Summary</p>
+    <p>{{ object.description|safe|truncatewords_html:30 }}</p>
+  </div>
+</div>
+
+
+{% endblock %}

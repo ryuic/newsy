@@ -3,12 +3,31 @@
 
 {% block content %}
 <h1>Feed listing</h1>
-<p><a href="{% url feed.views.create %}">Create feed</a></p>
+<p>
+  <a href="{% url feed.views.create %}">Create feed</a> |
+  <a href="{% url feed.views.entry_list %}">All entries</a> |
+  <a href="#" id="refleshLink">Reflesh Classifier</a>
+</p>
+
+
+<dl>
+  {% for table in timetable %}
+    {% for t in table %}
+      <dt style="background-color:#{% ifchanged %}eee{% else %}fff{% endifchanged %};">
+        <b>{{ t.hour }} : {{ t.minute|join:", " }}</b>
+      </dt>
+      <dd>{{ t.feed }}</dd>
+    {% endfor %}
+  {% endfor %}
+</dl>
+
 
 <table class="defaultTable">
-  {% for feed in object_list %}
+  {% for feed in feeds %}
     <tr>
       <td><a href="{% url feed.views.show key=feed.key %}" class="medium bold">{{ feed.name }}</a></td>
+      <td class="green">{{ feed.execute_hour|join:", " }}</td>
+      <td class="grey">{{ feed.execute_minute|join:", " }}</td>
       <td><a href="{% url feed.views.edit key=feed.key %}">Edit</a></td>
       <td><a href="{% url feed.views.delete key=feed.key %}">Delete</a></td>
       <td><a href="{% url feed.views.entry_list key=feed.key %}">Entries</a></td>
@@ -16,12 +35,25 @@
   {% endfor %}
 </table>
 
-<div>
-  {% if has_previous %}
-    <a href="{% url feed.views.index %}?page={{ previous }}">&lt;-previous</a>
-  {% endif %}
-  {% if has_next %}
-    <a href="{% url feed.views.index %}?page={{ next }}">next-&gt;</a>
-  {% endif %}
-</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#refleshLink').click(function(){
+    var $this = $(this);
+    $.ajax({
+      url : '/feed/refleshclassifier/',
+      dataType : 'json',
+      beforeSend : function(){
+        $this.parent('p').append('<span>reflashing...</span>');
+      },
+      success : function(){
+        $this.next('span').css('color', 'green').text('reflashd!');
+      }
+    });
+    return false;
+  });
+});
+</script>
 {% endblock %}

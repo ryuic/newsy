@@ -1,8 +1,98 @@
 import random
 from math import sqrt
+import re, logging
 
-def text():
-    rows = [['AAA', 'BBB', 'CCC']]
+IGNOREWORDS = [
+    'about',
+    'after',
+    'almost',
+    'along',
+    'also',
+    'another',
+    'around',
+    'away',
+    'been',
+    'before',
+    'could',
+    'days',
+    'didn',
+    'else',
+    'ever',
+    'every',
+    'first',
+    'from',
+    'gets',
+    'give',
+    'have',
+    'here',
+    'into',
+    'just',
+    'know',
+    'like',
+    'long',
+    'made',
+    'many',
+    'make',
+    'might',
+    'more',
+    'only',
+    'other',
+    'said',
+    'should ',
+    'some',
+    'sure',
+    'that',
+    'their',
+    'these',
+    'they',
+    'this', 
+    'think',
+    'than',
+    'then',
+    'them',
+    'there',
+    'those',
+    'time',
+    'under',
+    'very',
+    'wasnt',
+    'week',
+    'well',
+    'were',
+    'will',
+    'what ',
+    'when',
+    'which',
+    'with',
+    'would',
+    'year',
+    'your',
+]
+
+def get_words(entry, wordcount=50):
+    remover = re.compile(r'<[^>]+>')
+    splitter = re.compile(r'[^A-Z^a-z]+')
+    f = {}
+
+    txt = remover.sub('', entry.title)
+    title = splitter.split(txt)
+    titlewords = [s.lower() for s in title
+                    if len(s) > 3 and len(s) < 20 and s not in IGNOREWORDS]
+
+    for w in titlewords:
+        f.setdefault(w, 0)
+        f[w] += 1
+
+    txt = remover.sub('', entry.description)
+    desc = splitter.split(txt)
+    descwords = [s.lower() for s in desc[0:wordcount]
+                    if len(s) > 3 and len(s) < 20 and s not in IGNOREWORDS]
+
+    for i, w in enumerate(descwords):
+        f.setdefault(w, 0)
+        f[w] += 1
+
+    return f
 
 def peason(v1, v2):
     sum1 = sum(v1)

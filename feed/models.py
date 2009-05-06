@@ -3,6 +3,16 @@ from django.db.models import permalink, signals
 from google.appengine.ext import db
 from ragendja.dbutils import cleanup_relations
 
+class FeatureCount(db.Model):
+    feature = db.StringProperty()
+    category = db.StringProperty()
+    count = db.IntegerProperty(default = 1)
+
+class CategoryCount(db.Model):
+    category = db.StringProperty()
+    count = db.IntegerProperty(default = 1)
+
+
 class Feed(db.Model):
     name = db.StringProperty(required=True)
     url = db.LinkProperty(required=True)
@@ -22,16 +32,17 @@ signals.pre_delete.connect(cleanup_relations, sender=Feed)
 
 class Entry(db.Model):
     feed_ref = db.ReferenceProperty(Feed)
+    cat_ref = db.ReferenceProperty(CategoryCount)
     title = db.StringProperty()
     url = db.LinkProperty()
     description = db.TextProperty()
     url_hash = db.StringProperty()
-    is_scanned = db.BooleanProperty(default = False)
+    is_trained = db.BooleanProperty(default = False)
     created_at = db.DateTimeProperty(auto_now_add = 1)
     updated_at = db.DateTimeProperty(auto_now_add = 1)
 
     def __unicode__(self):
-        return self.feed_ref.name
+        return self.title
     
     @permalink
     def get_absolute_url(self):
@@ -62,16 +73,6 @@ class Crawl(db.Model):
 
     def __unicode__(self):
         return self.feed_ref.name
-
-
-class FeatureCount(db.Model):
-    feature = db.StringProperty()
-    category = db.StringProperty()
-    count = db.IntegerProperty(default = 1)
-
-class CategoryCount(db.Model):
-    category = db.StringProperty()
-    count = db.IntegerProperty(default = 1)
 
 
 class EntryDuplicateError(Exception):

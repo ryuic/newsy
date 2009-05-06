@@ -12,11 +12,9 @@ from appenginepatcher.patch import patch_all, setup_logging
 patch_all()
 
 import django.core.handlers.wsgi
-from google.appengine.ext.webapp import util, template
+from google.appengine.ext.webapp import util
 from django.conf import settings
 
-#template filters
-template.register_template_library('lib.template_filters')
 
 def real_main():
     os.environ.update(aecmd.env_ext)

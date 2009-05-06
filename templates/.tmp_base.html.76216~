@@ -39,19 +39,6 @@
       </div>
 
       <div id="sidebar">
-        {% block categories %}
-        <div class="block">
-          <ul id="categories">
-            <li><a href="{% url archive.views.list cat="Google" %}">Google</a></li>
-            <li><a href="{% url archive.views.list cat="Apple" %}">Apple</a></li>
-            <li><a href="{% url archive.views.list cat="Microsoft" %}">Microsoft</a></li>
-            <li><a href="{% url archive.views.list cat="Web" %}">Web</a></li>
-            <li><a href="{% url archive.views.list cat="Gadgets" %}">Gadgets</a></li>
-            <li><a href="{% url archive.views.list cat="Software" %}">Software</a></li>
-            <li><a href="{% url archive.views.list cat="Other" %}">Other</a></li>
-          </ul>
-        </div>
-        {% endblock %}
         {% block sidebar %}{% endblock %}
       </div>
 

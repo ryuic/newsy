@@ -8,7 +8,7 @@ from ragendja.forms import FormWithSets, FormSetField
 class FeedForm(forms.ModelForm):
     name = forms.CharField(widget=forms.TextInput(attrs=dict(maxlength=75)),
         label=_(u'Feed Name'))
-    url = forms.URLField(widget=forms.TextInput(attrs=dict(maxlength=75)),
+    url = forms.URLField(widget=forms.TextInput(attrs=dict(maxlength=255)),
          label=_(u'Feed URL'))
 
     HOURS = [(i,i) for i in range(0, 24)]

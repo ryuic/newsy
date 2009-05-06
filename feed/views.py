@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.views.generic.list_detail import object_list, object_detail
@@ -6,20 +7,38 @@ from django.views.generic.create_update import create_object, delete_object, \
     update_object
 from feed.forms import *
 from feed.models import *
-from ragendja.auth.decorators import staff_only
 from ragendja.dbutils import get_object_or_404
-from ragendja.template import render_to_response
+from ragendja.template import render_to_response, JSONResponse
+from settings import DEBUG
 from datetime import datetime
 from lib import feedparser, docclass, clusters
-import logging, re, md5
+import logging, md5
 
-#@staff_only
+
 def index(request):
-    return object_list(request, Feed.all().order('-created_at'), paginate_by=10)
+    #return object_list(request, Feed.all().order('-created_at'), paginate_by=30,
+    #                   extra_context={'timetable' : timetable})
+    feeds = Feed.all().order('-created_at').fetch(50)
+
+    tmp = {}
+    for f in feeds:
+        for eh in f.execute_hour:
+            if eh not in tmp: tmp.setdefault(eh, [])
+            tmp[eh].append({
+                'hour' : eh,
+                'minute' : f.execute_minute,
+                'feed' : f.name
+            })
+
+    timetable = []
+    for i in range(24):
+        if i in tmp: timetable.append(tmp[i])
+
+    return render_to_response(request, 'feed/feed_list.html',
+                              {'feeds' : feeds, 'timetable' : timetable})
 
 def show(request, key):
-    #feed = get_object_or_404(Feed, key)
-    feed = Feed.get(key)
+    feed = get_object_or_404(Feed, key)
     entries = Entry.all().filter('feed_ref =', feed).order('-created_at')
     return object_detail(request, Feed.all(), key, extra_context={'entries' : entries})
 
@@ -59,35 +78,38 @@ def entry_delete(request, key):
     return delete_object(request, Entry, object_id=key,
         post_delete_redirect=reverse('feed.views.entry_list'))
 
-def classify(request):
-    data = []
-    scanned_entries = Entry.all().filter('is_scan =', True).fetch(20)
-    for e in scanned_entries:
-        for wl in e.wordlist_set:
-            data.append([])
-    clusters.kcluster()
-
 def crawl(request):
-    now = datetime.now()
-    feeds = Feed.all() \
-        .order('-created_at').fetch(100)
-    #    .filter('execute_hour =', now.hour) \
-    #    .filter('execute_minute =', now.minute) \
-    #    .fetch(100)
+    now = datetime.utcnow()
+    feed_obj = Feed.all().filter('execute_hour =', now.hour).fetch(50)
 
-    entries = []
+    if now.minute <= 15:
+        feeds = [f for f in feed_obj for em in f.execute_minute if em <= 15]
+    elif now.minute <= 30:
+        feeds = [f for f in feed_obj for em in f.execute_minute if em > 15 and em <= 30]
+    elif now.minute <= 45:
+        feeds = [f for f in feed_obj for em in f.execute_minute if em > 30 and em <= 45]
+    else:
+        feeds = [f for f in feed_obj for em in f.execute_minute if em > 45]
+
+    classifier = docclass.naivebayes(docclass.entryfeatures)
+    classifier.setthreshold('Google', 2.0)
+    classifier.setthreshold('Apple', 2.0)
+    classifier.setthreshold('Microsoft', 2.0)
+
+    entries, categories = [], []
 
     for feed in feeds:
-        logging.info("Start Crawl >>> %s, [%d:%d %d]" % (feed.url, now.hour, now.minute, now.second))
         d = feedparser.parse(feed.url)
-        for e in d.entries:
+
+        for e in d.entries[0:5]:
             try:
                 url_hash = md5.new(e.link).hexdigest()
                 entry = Entry.all().filter('url_hash =', url_hash).get()
                 if entry: continue
 
                 if 'summary' in e: summary = e.summary
-                else: summary = e.description
+                elif 'description' in e: summary = e.description
+                else: summary = ''
 
                 entry = Entry(
                     feed_ref = feed.key(),
@@ -95,197 +117,71 @@ def crawl(request):
                     url = e.link,
                     description = summary,
                     url_hash = url_hash)
+
+                if not DEBUG:
+                    classifier.classify(entry, 'Unknown')
+                    processing_time = classifier.get_processingtime()
+                    logging.info('processing time >>> %s' % processing_time)
+                    entry.cat_ref = classifier.getbestcat()
+                    categories.append(entry.cat_ref)
+
                 entry.save()
                 entries.append(entry)
             except StandardError, inst:
                 logging.error('Failed to parse feed %s, %s' % (feed.url, inst))
-        logging.info("End Crawl >>> %s, [%d:%d %d]" % (feed.url, now.hour, now.minute, now.second))
 
-    return render_to_response(request, 'feed/crawl.html', 
-        {'feeds' : feeds, 'entries' : entries})
+    #Delete cache.
+    cat_set = set(categories)
+    for c in list(cat_set): cache.delete('%s_entries' % c.category)
 
-def scan(request):
-    entries = Entry.all().filter('is_scanned =', False).order('-created_at').fetch(15)
-    wordcounts, apcount = {}, {}
+    return HttpResponse()
 
-    for e in entries:
-        wc = getwordcounts(e)
-        wordcounts[e] = wc
+def train(request, key):
+    classifier = docclass.naivebayes(docclass.entryfeatures)
+    entry = Entry.get(key)
+    category = ""
 
-        #apcountの集計
-        for word, count in wc.items():
-            apcount.setdefault(word, 0)
-            if count > 1: apcount[word] += 1
+    if request.method == 'POST':
+        if 'word' in request.POST and request.POST.get('word') and request.POST.get('word') != '':
+            category_count = classifier.train(entry, request.POST.get('word'))
+            entry.cat_ref = category_count
+            entry.is_trained = True
+            entry.save()
+            category = category_count.category
+            cache.delete('%s_entries' % category)
 
-    wordlist = []
-    for w, bc in apcount.items():
-        frac = float(bc) / len(entries)
-        if frac > 1.0 and frac < 0.5: wordlist.append(w)
+    return JSONResponse({ 'category' : category })
 
-    for entry, wc in wordcounts.items():
-        for word, count in wc.items():
-            if not word in wordlist: continue
+def untrain(request, key):
+    classifier = docclass.naivebayes(docclass.entryfeatures)
+    entry = Entry.get(key)
 
-            #Datastore
-            w = Word.all().filter('word =', word).get()
-            if not w: w = Word(word=word, apcount=count)
-            else: w.apcount += count
-            w.save()
-            wl = WordList(entry_ref=entry, word_ref=w, apcount=count).save()
-        entry.is_scanned = True
+    if request.method == 'POST':
+        cache.delete('%s_entries' % entry.cat_ref.category)
+        classifier.untrain(entry)
+        entry.cat_ref = None
+        entry.is_trained = False
         entry.save()
 
-    return render_to_response(request, 'feed/scan.html',  {'entries' : entries})
+    return HttpResponse(mimetype='application/javascript')
 
-def _crawl(request):
-    now = datetime.now()
-    feeds = Feed.all() \
-        .order('-created_at').fetch(1)
-    #    .filter('execute_hour =', now.hour) \
-    #    .filter('execute_minute =', now.minute) \
-    #    .fetch(100)
+def guess(request, key):
+    classifier = docclass.naivebayes(docclass.entryfeatures)
+    classifier.setthreshold('Google', 2.0)
+    classifier.setthreshold('Apple', 2.0)
+    classifier.setthreshold('Microsoft', 2.0)
 
-    apcount = {}
-    wordcounts = {}
-    entry_count = 0
+    entry = Entry.get(key)
 
-    for feed in feeds:
-        logging.info("Start Crawl >>> %s, [%d:%d %d]" % (feed.url, now.hour, now.minute, now.second))
-        d = feedparser.parse(feed.url)
-        for e in d.entries[6:]:
-            try:
-                entry, wc = getwordcounts(feed, e)
-                wordcounts[entry] = wc
+    category = classifier.classify(entry, 'unknown')
+    processingtime = classifier.get_processingtime()
 
-                #apcountの集計
-                for word, count in wc.items():
-                    apcount.setdefault(word, 0)
-                    if count > 1: apcount[word] += 1
+    return JSONResponse({
+        'category' : category,
+        'processingtime' : processingtime
+        })
 
-                entry_count += 1
-            except EntryDuplicateError:
-                pass
-            except StandardError, inst:
-                logging.error('Failed to parse feed %s, %s' % (feed.url, inst))
-        logging.info("End Crawl >>> %s, [%d:%d %d]" % (feed.url, now.hour, now.minute, now.second))
-
-    logging.debug('entry_count >>>>> %s' % entry_count)
-
-    wordlist = []
-    for w, bc in apcount.items():
-        frac = float(bc) / entry_count
-        if frac > 0.07 and frac < 0.9: wordlist.append(w)
-
-    results = []
-    for entry, wc in wordcounts.items():
-        result = {'blog' : feed.name, 'count' : []}
-
-        for word, count in wc.items():
-            if not word in wordlist: continue
-
-            #Datastore
-            w = Word.all().filter('word =', word).get()
-            if not w: w = Word(word=word, apcount=count)
-            else: w.apcount += count
-            w.save()
-            wl = WordList(entry_ref=entry, word_ref=w, apcount=count).save()
-
-            result['count'].append(count)
-        results.append(result)
-
-    return render_to_response(request, 'feed/crawl.html', 
-        {'feeds' : feeds, 'results' : results, 'wordlist' : wordlist})
-
-def getwordcounts(e):
-    wc = {}
-    i = 0
-    words = getwords(e.title + ' ' + e.description)
-    for word in words:
-        if i > 150: break
-        wc.setdefault(word, 0)
-        wc[word] += 1
-        i += 1
-    return wc
-
-def _getwordcounts(feed, e):
-    url_hash = md5.new(e.link).hexdigest()
-    entry = Entry.all().filter('url_hash =', url_hash).get()
-    if entry:
-        raise EntryDuplicateError, '%s has been already add.' % e.link
-
-    if 'media' in e: del e['media']
-    if 'summary' in e: summary = e.summary
-    else: summary = e.description
-
-    wc = {}
-    i = 0
-    words = getwords(e.title + ' ' + summary)
-    for word in words:
-        if i > 150: break
-        wc.setdefault(word, 0)
-        wc[word] += 1
-        i += 1
-
-    entry = Entry(
-        feed_ref = feed.key(),
-        title = e.title,
-        url = e.link,
-        description = summary,
-        url_hash = url_hash)
-    entry.save()
-    return entry, wc
-
-IGNOREWORDS = [
-    'about',
-    'after',
-    'almost',
-    'also',
-    'been',
-    'before',
-    'could',
-    'didn',
-    'ever',
-    'first',
-    'from',
-    'have',
-    'here',
-    'into',
-    'just',
-    'know',
-    'like',
-    'logn',
-    'many',
-    'make',
-    'more',
-    'only',
-    'should ',
-    'some',
-    'that',
-    'their',
-    'these',
-    'they',
-    'this', 
-    'than',
-    'then',
-    'them',
-    'there',
-    'those',
-    'time',
-    'very',
-    'wasnt',
-    'well',
-    'were',
-    'will',
-    'what ',
-    'when',
-    'which',
-    'with',
-    'would',
-]
-
-def getwords(html):
-    txt = re.compile(r'<[^>]+>').sub('', html)
-    words = re.compile(r'[^A-Z^a-z]+').split(txt)
-    return [word.lower() for word in words 
-        if word != '' and len(word) > 3 and word not in IGNOREWORDS]
-
+def refleshclassifier(request):
+    classifier = docclass.naivebayes(docclass.getwords)
+    classifier.testrun()
+    return HttpResponse(mimetype='application/javascript')

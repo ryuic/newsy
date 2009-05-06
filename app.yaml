@@ -1,17 +1,35 @@
 application: newsy
-version: 99
+version: 1
 runtime: python
 api_version: 1
 
 default_expiration: '3650d'
 
 handlers:
+- url: /favicon.ico
+  static_files: media/img/favicon.ico
+  upload: media
+
 - url: /media
   static_dir: _generated_media
+
+- url: /img
+  static_dir: media/img
+
+- url: /css
+  static_dir: media/css
+
+- url: /js
+  static_dir: media/js
+
+- url: /admin/.* 
+  script: common/appenginepatch/main.py 
+  login: admin 
+
+- url: /feed/.*
+  script: common/appenginepatch/main.py
+  login: admin
 
 - url: /.*
   script: common/appenginepatch/main.py
 
-- url: /feed/crawl
-  script: common/appenginepatch/main.py
-  login: admin

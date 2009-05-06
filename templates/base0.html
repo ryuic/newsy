@@ -7,6 +7,9 @@
     xml:lang="{% firstof LANGUAGE_CODE 'en' %}"
     lang="{% firstof LANGUAGE_CODE 'en' %}">
   <head>
+    <link rel="shortcut icon" href="http://newsy.appspot.com/favicon.ico" />
+    <meta name="description" content="Newsy is a news aggregator of the most popular tech news. To save you time in just one page you can read the latest top tech news headlines." />
+    <meta name="keywords" content="newsy, tech, news, tech news, top news, New York Times, NY Times, Engadget, Linfehacker, Gizmode, TechCrunch, BBC, Mashable, Google, Apple, Microsoft" />
     <title>{% block title %}{% endblock %}</title>
     {# <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}combined-{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}.css" /> #}
     <link rel="stylesheet" type="text/css" href="/css/application.css" />
@@ -22,6 +25,7 @@
             Welcome, {{ user.username }}
             {% if google_user %}<a href="{% google_logout_url "/" %}">
             {% else %}<a href="/account/logout/">{% endif %}Logout</a>
+            {% if user.is_superuser %}<a href="{% url feed.views.index %}">Meta</a>{% endif %}
           {% else %}
             <a href="/account/login/">Login</a>
           {% endif %}
@@ -32,27 +36,8 @@
         </div>
       </div>
 
-      <div id="container">
-        <div id="things">
+      <div id="container0">
           {% block content %}asdf{% endblock %}
-        </div>
-      </div>
-
-      <div id="sidebar">
-        {% block categories %}
-        <div class="block">
-          <ul id="categories">
-            <li><a href="{% url archive.views.list cat="Google" %}">Google</a></li>
-            <li><a href="{% url archive.views.list cat="Apple" %}">Apple</a></li>
-            <li><a href="{% url archive.views.list cat="Microsoft" %}">Microsoft</a></li>
-            <li><a href="{% url archive.views.list cat="Web" %}">Web</a></li>
-            <li><a href="{% url archive.views.list cat="Gadgets" %}">Gadgets</a></li>
-            <li><a href="{% url archive.views.list cat="Software" %}">Software</a></li>
-            <li><a href="{% url archive.views.list cat="Other" %}">Other</a></li>
-          </ul>
-        </div>
-        {% endblock %}
-        {% block sidebar %}{% endblock %}
       </div>
 
       <div id="footer">

@@ -1,0 +1,177 @@
+{% extends 'base0.html' %}
+{% block title %}newsy{% endblock %}
+
+{% block content %}
+
+<div id="headline" class="block">
+  <table class="defaultTable">
+    <tr>
+      <td valign="top" style="padding:0 2.0em 0 0;">
+        {% for e in recent_entries %}
+          <div class="article">
+            <div><a href="{{ e.url }}" target="_blank" class="title" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+            <div class="articleInfo">
+              <span class="cat">{{ e.cat_ref.category }}</span>
+              <a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a>
+              {# <a href="{% url archive.views.show key=e.key %}">show</a> #}
+            </div>
+          </div>
+        {% endfor %}
+      </td>
+      <td valign="top" style="width:340px;">
+        <p class="intro"><b>newsy</b> is a news aggregator of the most popular tech news. To save you time in just one page you can read the latest top tech news headlines.</p>
+        <div style="margin:2.2em 0;">
+        {%  if debug %}
+        advertising
+        {% else %}
+<script type="text/javascript"><!--
+google_ad_client = "pub-8016552340374363";
+/* 336x280, 作成済み 09/05/05 */
+google_ad_slot = "9102471299";
+google_ad_width = 336;
+google_ad_height = 280;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+        {% endif %}
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<div id="topItems">
+  <div class="block">
+    <table class="defaultTable">
+      <tr>
+        <td style="width:33%;" valign="top">
+          <p class="label"><a href="{% url archive.views.list cat="Google" %}">Google</a></p>
+          {% for e in google_entries %}
+            <div class="article">
+              <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+              <div class="articleInfo"><a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a></div>
+            </div>
+          {% endfor %}
+          <p class="flabel"><a href="{% url archive.views.list cat="Google" %}">read more</a></p>
+        </td>
+        <td style="width:33%;" valign="top">
+          <p class="label"><a href="{% url archive.views.list cat="Apple" %}">Apple</a></p>
+          {% for e in apple_entries %}
+            <div class="article">
+              <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+              <div class="articleInfo"><a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a></div>
+            </div>
+          {% endfor %}
+          <p class="flabel"><a href="{% url archive.views.list cat="Apple" %}">read more</a></p>
+        </td>
+        <td style="width:33%;" valign="top">
+          <p class="label"><a href="{% url archive.views.list cat="Microsoft" %}">Microsoft</a></p>
+          {% for e in microsoft_entries %}
+            <div class="article">
+              <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+              <div class="articleInfo"><a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a></div>
+            </div>
+          {% endfor %}
+          <p class="flabel"><a href="{% url archive.views.list cat="Microsoft" %}">read more</a></p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="block">
+    <table class="defaultTable">
+      <tr>
+        <td style="width:33%;" valign="top">
+          <p class="label"><a href="{% url archive.views.list cat="Web" %}">Web</a></p>
+          {% for e in web_entries %}
+            <div class="article">
+              <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+              <div class="articleInfo"><a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a></div>
+            </div>
+          {% endfor %}
+          <p class="flabel"><a href="{% url archive.views.list cat="Web" %}">read more</a></p>
+        </td>
+        <td style="width:33%;" valign="top">
+          <p class="label"><a href="{% url archive.views.list cat="Gadgets" %}">Gadgets</a></p>
+          {% for e in gadget_entries %}
+            <div class="article">
+              <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+              <div class="articleInfo"><a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a></div>
+            </div>
+          {% endfor %}
+          <p class="flabel"><a href="{% url archive.views.list cat="Gadgets" %}">read more</a></p>
+        </td>
+        <td style="width:33%;" valign="top">
+          <p class="label"><a href="{% url archive.views.list cat="Software" %}">Software</a></p>
+          {% for e in software_entries %}
+            <div class="article">
+              <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+              <div class="articleInfo"><a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a></div>
+            </div>
+          {% endfor %}
+          <p class="flabel"><a href="{% url archive.views.list cat="Software" %}">read more</a></p>
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <div class="block">
+    <table class="defaultTable">
+      <tr>
+        <td valign="top">
+          <p class="label"><a href="{% url archive.views.list cat="Other" %}">Other News</a></p>
+          {% for e in other_entries %}
+            <div class="article">
+              <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
+              <div class="articleInfo light-grey">{{ e.feed_ref.name }}</div>
+            </div>
+          {% endfor %}
+          <p class="flabel"><a href="{% url archive.views.list cat="Software" %}">read more</a></p>
+        </td>
+        <td valign="top" style="width:340px;">
+         {%  if debug %}
+         advertising
+         {% else %}
+
+         {% endif %}
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+</div>
+
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#container0 div.article a').tooltip({
+    track: true, 
+    delay: 0, 
+    showURL: false, 
+    opacity: 1, 
+    fixPNG: true, 
+    showBody: " - ", 
+    extraClass: 'pretty', 
+    top: -15, 
+    left: 5 
+  });
+  
+  $('#topItems p.flabel').hover(
+    function(){
+      $(this).css('backgroundColor', '#eee');
+    },
+    function(){
+      $(this).css('backgroundColor', '#fff');
+    }
+  ).click(function(){
+    location.href = $(this).find('a').attr('href');
+    return false;
+  });
+});
+</script>
+{% endblock %}

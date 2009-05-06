@@ -16,7 +16,7 @@
   <div class="entry">
    <div class="title"><a href="{{b.link}}">{{b.title|safe}}</a></div>
    <div class="summary">{{b.description|safe}}</div>
-   <div class="url">{{b.link|substr|safe}}</div>
+   <div class="url">{{b.link|truncatewords:5|safe}}</div>
   </div>
   {% endfor %}
  </div>
