@@ -108,11 +108,14 @@ def peason(v1, v2):
     return 1.0 - num/den
 
 def kcluster(rows, distance=peason, k=4):
+    word_length = len([rows[0]])
+    logging.debug(len("word_length >>>>> %d" % word_length))
     ranges = [(min([row[i] for row in rows]), max([row[i] for row in rows]))
-        for i in range(len[row[0]])]
+        for i in range(word_length)]
 
+    logging.debug(len(ranges))
     clusters = [[random.random() * (ranges[i][1] - ranges[i][0]) + ranges[1][0]
-        for i in range(len(row[0]))] for j in range(k)]
+        for i in range(word_length)] for j in range(k)]
 
     lastmatches = None
 

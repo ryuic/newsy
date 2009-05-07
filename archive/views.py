@@ -54,28 +54,27 @@ def list(request, cat=None, blog=None, label=''):
 def show(request, key):
     entry = get_object_or_404(Entry, key)
 
-    wordcounts = {}
+    wordcounts = []
     wordlist = []
     words = []
     entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(20)
 
     for e in entries:
         wc = clusters.get_words(e)
-        wordcounts[e.key()] = wc
+        wordcounts.append(wc)
         for w in wc.keys():
             if w not in wordlist: wordlist.append(w)
 
-    for w in wordlist:
-        logging.info("w: >> %s" % w)
+    for i in range(len(wordcounts)):
+        words.append([])
 
     i = 0
-    for wc in wordcounts.values():
-        for w, count in wc.items():
-            for n, word in enumerate(wordlist):
-                words[i] = []
-                if word == w: words[i][n] = count
-                else: words[i][n] = 0
-                logging.info("w: >> %s, c >> %d" % w, words[i][-1])
+    for wc in wordcounts:
+        for word in wordlist:
+            if word in wc: c = wc[word]
+            else: c = 0
+            words[i].append(c)
+            #logging.info("w: >> %s, c >> %d" % (word, c))
         i += 1
 
     kcluster = clusters.kcluster(words)

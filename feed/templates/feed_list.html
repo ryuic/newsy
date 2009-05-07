@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_admin.html' %}
 {% block title %}Feed listing{% endblock %}
 
 {% block content %}
@@ -10,7 +10,8 @@
 </p>
 
 
-<dl>
+<h2>Timetable</h2>
+<dl style="margin:1.2em 0;">
   {% for table in timetable %}
     {% for t in table %}
       <dt style="background-color:#{% ifchanged %}eee{% else %}fff{% endifchanged %};">
@@ -22,7 +23,16 @@
 </dl>
 
 
+<h3>Feeds</h3>
 <table class="defaultTable">
+  <tr>
+      <th>Feed name</th>
+      <td class="green">hour(s)</td>
+      <td class="grey">minute(s)</td>
+      <td></td>
+      <td></td>
+      <td></td>
+  </tr>
   {% for feed in feeds %}
     <tr>
       <td><a href="{% url feed.views.show key=feed.key %}" class="medium bold">{{ feed.name }}</a></td>

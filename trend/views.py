@@ -9,10 +9,6 @@ from google.appengine.api import urlfetch
 from lib import boss, feedparser
 import urllib, re, sha, logging
 
-def index(request):
-    return render_to_response(request, 'trend/index.html', {})
-
-
 def list(request):
     trends = googletrend()
     payload = dict(trends=trends)
