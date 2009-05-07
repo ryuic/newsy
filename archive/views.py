@@ -56,8 +56,7 @@ def show(request, key):
 
     wordcounts = []
     wordlist = []
-    words = []
-    entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(20)
+    entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(10)
 
     for e in entries:
         wc = clusters.get_words(e)
@@ -65,8 +64,7 @@ def show(request, key):
         for w in wc.keys():
             if w not in wordlist: wordlist.append(w)
 
-    for i in range(len(wordcounts)):
-        words.append([])
+    words = [[] for i in range(len(wordcounts))]
 
     i = 0
     for wc in wordcounts:
@@ -74,14 +72,14 @@ def show(request, key):
             if word in wc: c = wc[word]
             else: c = 0
             words[i].append(c)
-            #logging.info("w: >> %s, c >> %d" % (word, c))
         i += 1
 
     kcluster = clusters.kcluster(words)
 
-    return render_to_response(request, 'archive/entry_detail.html',payload)
-    #return object_detail(request, Entry.all(), key, extra_context={},
-    #                     template_name='archive/entry_detail.html')
+    logging.debug(kcluster)
+
+    return render_to_response(request, 'archive/entry_detail.html',
+                              {'entry' : entry, 'kcluster' : kcluster, 'words' : words})
 
 def get_entries(name, categories=None, limit=10, expire=86400):
     markup = '%s_entries' % name

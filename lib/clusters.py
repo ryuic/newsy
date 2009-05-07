@@ -100,7 +100,7 @@ def peason(v1, v2):
     sum1Sq = sum([pow(v, 2) for v in v1])
     sum2Sq = sum([pow(v, 2) for v in v2])
 
-    pSum = sum([v1[i] * v2[i]] for i in range(len(v1)))
+    pSum = sum([v1[i] * v2[i] for i, d in enumerate(v1)])
     
     num = pSum - (sum1-sum2/len(v1))
     den = sqrt(((sum1Sq - pow(sum1, 2)) / len(v1)) * (sum2Sq - pow(sum2, 2) / len(v1)))
@@ -108,12 +108,11 @@ def peason(v1, v2):
     return 1.0 - num/den
 
 def kcluster(rows, distance=peason, k=4):
-    word_length = len([rows[0]])
-    logging.debug(len("word_length >>>>> %d" % word_length))
+    word_length = len(rows[0])
+
     ranges = [(min([row[i] for row in rows]), max([row[i] for row in rows]))
         for i in range(word_length)]
 
-    logging.debug(len(ranges))
     clusters = [[random.random() * (ranges[i][1] - ranges[i][0]) + ranges[1][0]
         for i in range(word_length)] for j in range(k)]
 
@@ -121,20 +120,19 @@ def kcluster(rows, distance=peason, k=4):
 
     for t in range(100):
         bestmatches = [[] for i in range(k)]
-        
-        for j in range(len(rows)):
-            row = rows[j]
+
+        for j, row in enumerate(rows):
             bestmatch = 0
             for i in range(k):
                 d = distance(clusters[i], row)
                 if d < distance(clusters[bestmatch], row): bestmatch = i
-            bestmatches[bestmatches].append(j)
+            bestmatches[bestmatch].append(j)
         
         if bestmatches == lastmatches: break
         lastmatches = bestmatches
         
         for i in range(k):
-            avgs = [0.0] * len(rows[0])
+            avgs = [0.0] * word_length
             if len(bestmatches[i]) > 0:
                 for rowid in bestmatches[i]:
                     for m in range(len(rows[rowid])):

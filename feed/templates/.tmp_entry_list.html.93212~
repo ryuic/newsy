@@ -48,12 +48,12 @@
   {% endfor %}
 </table>
 
-<div class="pagination">
+<div>
   {% if has_previous %}
-    <a href="{% url feed.views.entry_list key=key %}?page={{ previous }}">&lt;-previous</a>
+    <a href="{% url feed.views.entry_list %}?page={{ previous }}">&lt;-previous</a>
   {% endif %}
   {% if has_next %}
-    <a href="{% url feed.views.entry_list key=key %}?page={{ next }}">next-&gt;</a>
+    <a href="{% url feed.views.entry_list %}?page={{ next }}">next-&gt;</a>
   {% endif %}
 </div>
 {% endblock %}
