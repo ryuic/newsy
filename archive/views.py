@@ -58,6 +58,7 @@ def show(request, key):
     wordlist = []
     entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(10)
 
+    #clustering
     for e in entries:
         wc = clusters.get_words(e)
         wordcounts.append(wc)
@@ -69,8 +70,8 @@ def show(request, key):
     i = 0
     for wc in wordcounts:
         for word in wordlist:
-            if word in wc: c = wc[word]
-            else: c = 0
+            if word in wc: c = float(wc[word])
+            else: c = 0.0
             words[i].append(c)
         i += 1
 

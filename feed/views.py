@@ -100,10 +100,15 @@ def crawl(request):
 
     for feed in feeds:
         d = feedparser.parse(feed.url)
+        markup = "_crawledurls_%s" % feed.name
+        cached_urls = cache.get(markup, [])
 
+        i = 0
         for e in d.entries[0:5]:
             try:
                 url_hash = md5.new(e.link).hexdigest()
+
+                if url_hash in cached_urls: continue
                 entry = Entry.all().filter('url_hash =', url_hash).get()
                 if entry: continue
 
@@ -118,7 +123,7 @@ def crawl(request):
                     description = summary,
                     url_hash = url_hash)
 
-                if not DEBUG:
+                if not DEBUG and i < 5:
                     classifier.classify(entry, 'Unknown')
                     processing_time = classifier.get_processingtime()
                     logging.info('processing time >>> %s' % processing_time)
@@ -127,10 +132,17 @@ def crawl(request):
 
                 entry.save()
                 entries.append(entry)
+
+                cached_urls.insert(0, url_hash)
+                i += 1
             except StandardError, inst:
                 logging.error('Failed to parse feed %s, %s' % (feed.url, inst))
 
-    #Delete cache.
+        #Update cache
+        del cached_urls[50:]
+        cache.set(markup, cached_urls, 86400)
+
+    #Delete cache
     cat_set = set(categories)
     for c in list(cat_set): cache.delete('%s_entries' % c.category)
 
