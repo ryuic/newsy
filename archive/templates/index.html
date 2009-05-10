@@ -12,14 +12,19 @@
             <div><a href="{{ e.url }}" target="_blank" class="title" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
             <div class="articleInfo">
               <span class="cat">{{ e.cat_ref.category }}</span>
-              <a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a>
-              <a href="{% url archive.views.show key=e.key %}">show</a>
+              <a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a>&nbsp;&nbsp;
+              <span class="grey">{{ e.entrycategory_set|join:", " }}</span>
             </div>
           </div>
         {% endfor %}
       </td>
       <td valign="top" style="width:340px;">
         <p class="intro"><b>newsy</b> is a news aggregator of the most popular tech news. To save you time in just one page you can read the latest top tech news headlines.</p>
+        <div id="strip">
+          <ul>
+            <li><a href="{% url gadget %}" class="bold">Get Gadget</a></li>
+          </ul>
+        </div>
         <div style="margin:2.2em 0;">
         {%  if debug %}
         advertising
@@ -128,7 +133,7 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
               <div class="articleInfo light-grey">{{ e.feed_ref.name }}</div>
             </div>
           {% endfor %}
-          <p class="flabel"><a href="{% url archive.views.list cat="Software" %}">read more</a></p>
+          <p class="flabel"><a href="{% url archive.views.list cat="Other" %}">read more</a></p>
         </td>
         <td valign="top" style="width:340px;">
          {%  if debug %}
@@ -142,7 +147,6 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
   </div>
   
 </div>
-
 
 {% endblock %}
 

@@ -3,12 +3,6 @@
 
 {% block content %}
 <h1>Feed listing</h1>
-<p>
-  <a href="{% url feed.views.create %}">Create feed</a> |
-  <a href="{% url feed.views.entry_list %}">All entries</a> |
-  <a href="#" id="refleshLink">Reflesh Classifier</a>
-</p>
-
 
 <h2>Timetable</h2>
 <dl style="margin:1.2em 0;">
@@ -45,25 +39,4 @@
   {% endfor %}
 </table>
 
-{% endblock %}
-
-{% block js %}
-<script type="text/javascript">
-$(document).ready(function(){
-  $('#refleshLink').click(function(){
-    var $this = $(this);
-    $.ajax({
-      url : '/feed/refleshclassifier/',
-      dataType : 'json',
-      beforeSend : function(){
-        $this.parent('p').append('<span>reflashing...</span>');
-      },
-      success : function(){
-        $this.next('span').css('color', 'green').text('reflashd!');
-      }
-    });
-    return false;
-  });
-});
-</script>
 {% endblock %}

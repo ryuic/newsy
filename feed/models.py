@@ -8,10 +8,15 @@ class FeatureCount(db.Model):
     category = db.StringProperty()
     count = db.IntegerProperty(default = 1)
 
+    def __unicode__(self):
+        return self.feature
+
 class CategoryCount(db.Model):
     category = db.StringProperty()
     count = db.IntegerProperty(default = 1)
 
+    def __unicode__(self):
+        return self.category
 
 class Feed(db.Model):
     name = db.StringProperty(required=True)
@@ -43,12 +48,20 @@ class Entry(db.Model):
 
     def __unicode__(self):
         return self.title
-    
+
     @permalink
     def get_absolute_url(self):
         return ('feed.views.entry_show', (), {'key': self.key()})
 
 signals.pre_delete.connect(cleanup_relations, sender=Entry)
+
+class EntryCategory(db.Model):
+    entry_ref = db.ReferenceProperty(Entry)
+    lower_category = db.StringProperty()
+    orig_category = db.StringProperty()
+
+    def __unicode__(self):
+        return self.orig_category
 
 class Word(db.Model):
     word = db.StringProperty()

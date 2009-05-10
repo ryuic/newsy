@@ -66,7 +66,43 @@ def entry_list(request, key=None):
     return object_list(request, entries, paginate_by=25, extra_context=payload)
 
 def entry_show(request, key):
-    return object_detail(request, Entry.all(), key)
+    entry = get_object_or_404(Entry, key)
+
+    #clustering
+    wordcounts = []
+    wordlist = []
+    words = {}
+    entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(10)
+
+    for e in entries:
+        wc = clusters.get_words(e)
+        wordcounts.append(wc)
+        for w in wc.keys():
+            if w not in wordlist: wordlist.append(w)
+
+    words = [[] for i in range(len(wordcounts))]
+
+    i = 0
+    for wc in wordcounts:
+        for word in wordlist:
+            if word in wc: c = float(wc[word])
+            else: c = 0.0
+            words[i].append(c)
+        i += 1
+
+    kcluster = clusters.kcluster(words)
+    #logging.debug(kcluster)
+
+    similalities = []
+    for cluster in kcluster:
+        for i, c in enumerate(cluster):
+            if entries[c] == entry:
+                similalities = cluster
+                break
+
+    #return object_detail(request, Entry.all(), key)
+    return render_to_response(request, 'feed/entry_detail.html',
+                              {'entry' : entry, 'similalities' : similalities})
 
 def entry_edit(request, key):
     return update_object(request, object_id=key, form_class=EntryForm)
@@ -133,6 +169,11 @@ def crawl(request):
                 entry.save()
                 entries.append(entry)
 
+                if e.categories:
+                    for c in e.categories:
+                        ec = EntryCategory(entry_ref=entry, orig_category=c[1], lower_category=c[1].lower())
+                        ec.save()
+
                 cached_urls.insert(0, url_hash)
                 i += 1
             except StandardError, inst:
@@ -174,8 +215,8 @@ def untrain(request, key):
         entry.cat_ref = None
         entry.is_trained = False
         entry.save()
-
-    return HttpResponse(mimetype='application/javascript')
+        return JSONResponse({'success' : 1})
+    raise Http404()
 
 def guess(request, key):
     classifier = docclass.naivebayes(docclass.entryfeatures)

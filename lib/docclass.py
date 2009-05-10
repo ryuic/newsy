@@ -85,19 +85,18 @@ def entryfeatures(entry, wordcount=15):
     txt = remover.sub('', entry.description)
     desc = splitter.split(txt)
     descwords = [s.lower() for s in desc[0:wordcount]
-                    if len(s) > 3 and len(s) < 20 and s not in IGNOREWORDS]
+                    if len(s) > 3 and s not in IGNOREWORDS]
 
-    uc = 0
+    #uc = 0
     for i, w in enumerate(descwords):
         f[w] = 1
-        if w.isupper(): uc += 1
-
-        if i < len(descwords) - 1:
-            twowords = ' '.join(descwords[i:i+1])
-            f[twowords] = 1
-
-    if len(descwords) > 0 and float(uc) / len(descwords) > 0.3: f['UPPERCASE'] = 1
-
+#        if w.isupper(): uc += 1
+#
+#        if i < len(descwords) - 1:
+#            twowords = ' '.join(descwords[i:(i+2)])
+#            f[twowords] = 1
+#
+#    if len(descwords) > 0 and float(uc) / len(descwords) > 0.3: f['UPPERCASE'] = 1
     return f
 
 def getwords(doc):

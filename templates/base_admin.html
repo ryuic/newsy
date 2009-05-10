@@ -37,7 +37,15 @@
       </div>
 
       <div id="container0">
-          {% block content %}asdf{% endblock %}
+        {% block menu %}
+          <p>
+            <a href="{% url feed.views.create %}">Create feed</a> |
+            <a href="{% url feed.views.index %}">All feeds</a> |
+            <a href="{% url feed.views.entry_list %}">All entries</a> |
+            <a href="#" id="refleshLink">Reflesh Classifier</a>
+          </p>
+        {% endblock %}
+        {% block content %}asdf{% endblock %}
       </div>
 
       <div id="footer">
@@ -51,6 +59,24 @@
 {# <script type="text/javascript" src="{{ MEDIA_URL }}combined-{{ LANGUAGE_CODE }}.js"></script> #}
 <script type="text/javascript" src="/js/jquery.tooltip.pack.js"></script>
 <script type="text/javascript" src="/js/application.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#refleshLink').click(function(){
+    var $this = $(this);
+    $.ajax({
+      url : '/feed/refleshclassifier/',
+      dataType : 'json',
+      beforeSend : function(){
+        $this.parent('p').append('<span>reflashing...</span>');
+      },
+      success : function(){
+        $this.next('span').css('color', 'green').text('reflashd!');
+      }
+    });
+    return false;
+  });
+});
+</script>
 {% block js %}{% endblock %}
 
   </body>

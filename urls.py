@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls.defaults import *
 from django.contrib.auth.forms import UserCreationForm
+from django.views.generic.simple import direct_to_template
 from ragendja.urlsauto import urlpatterns
 from ragendja.auth.urls import urlpatterns as auth_patterns
 #from myapp.forms import UserRegistrationForm
@@ -24,4 +25,8 @@ urlpatterns = auth_patterns + patterns('',
     (r'^account/', include('registration.urls')),
     (r'^trend/', include('trend.urls')),
     (r'^feed/', include('feed.urls')),
+    url(r'^gadget/$',
+        direct_to_template,
+        {'template': 'gadget.html'},
+        name='gadget'),
 ) + urlpatterns

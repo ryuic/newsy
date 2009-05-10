@@ -177,6 +177,18 @@ div#footer{
  border-top:solid 1px #ccc;
  border-bottom:solid 1px #ccc;
  padding:7px 0;
+ margin-bottom:1.3em;
+}
+
+#strip{
+ background-color:#eee;
+ border-top:solid 1px #ccc;
+ border-bottom:solid 1px #ccc;
+ padding: 5px 20px;
+ margin-bottom:1.3em;
+}
+#strip a{
+ color:#333;
 }
 
 #topItems td{

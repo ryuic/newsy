@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rss version="2.0">
+  <channel>
+  <title>newsy{% if label %} - {{ label }}{% endif %}</title>
+  <link>http://newsy.appspot.com</link>
+  <description>To save you time in just one page you can read the latest top tech news headlines.</description>
+  <language>en</language>
+  {% for e in object_list %}
+  <item>
+  <title><![CDATA[{{ e.title|safe }}]]></title>
+  <link>{{ e.url }}</link>
+  <description><![CDATA[{{ e.description|safe }}]]></description>
+  {% for c in e.entrycategory_set %}
+  <category>{{ c }}</category>
+  {% endfor %}
+  <pubDate>{{e.created_at}}</pubDate>
+  </item>
+  {% endfor %}
+</channel>
+</rss>

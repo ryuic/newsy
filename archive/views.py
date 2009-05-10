@@ -1,39 +1,42 @@
 # -*- coding: utf-8 -*-
 from django.core.cache import cache
+from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.template import RequestContext
 from django.views.generic.list_detail import object_list, object_detail
-from django.views.generic.create_update import create_object, delete_object, \
-    update_object
 from feed.models import CategoryCount, Feed, Entry
-from ragendja.auth.decorators import staff_only
 from ragendja.dbutils import get_object_or_404
 from ragendja.template import render_to_response, JSONResponse
 from lib import clusters
 import logging
 
 def index(request):
-    categories = cache.get('categories')
-    if not categories:
-        categories = CategoryCount.all().fetch(20)
-        cache.set('categories', categories, 864000)
+    markup = '_index_'
+    res = cache.get(markup)
+    if not res:
+        categories = cache.get('categories')
+        if not categories:
+            categories = CategoryCount.all().fetch(20)
+            cache.set('categories', categories, 864000)
 
-    payload = {
-      'categories' : categories,
-      'recent_entries' : get_entries('recent', expire=900),
-      'google_entries' : get_entries('Google', categories),
-      'apple_entries' : get_entries('Apple', categories),
-      'microsoft_entries' : get_entries('Microsoft', categories),
-      'web_entries' : get_entries('Web', categories),
-      'gadget_entries' : get_entries('Gadgets', categories),
-      'software_entries' : get_entries('Software', categories),
-      'other_entries' : get_entries('Other', categories),
-    }
+        payload = {
+          'categories' : categories,
+          'recent_entries' : get_entries('recent', expire=900),
+          'google_entries' : get_entries('Google', categories),
+          'apple_entries' : get_entries('Apple', categories),
+          'microsoft_entries' : get_entries('Microsoft', categories),
+          'web_entries' : get_entries('Web', categories),
+          'gadget_entries' : get_entries('Gadgets', categories),
+          'software_entries' : get_entries('Software', categories),
+          'other_entries' : get_entries('Other', categories),
+        }
 
-    return render_to_response(request, 'archive/index.html',payload)
+        res = render_to_response(request, 'archive/index.html',payload)
+        cache.set(markup, res, 900)
+    return res
 
-def list(request, cat=None, blog=None, label=''):
+def list(request, cat=None, blog=None, label=None):
     entry_obj = Entry.all().order('-created_at')
 
     if cat:
@@ -47,42 +50,30 @@ def list(request, cat=None, blog=None, label=''):
         entry_obj.filter('feed_ref =', feed_obj)
         label = feed_obj.name
 
+    template_ext = 'xml' if request.GET.has_key('output') and request.GET.get('output') == 'rss' else 'html'
+
     return object_list(request, entry_obj, paginate_by=25,
                        extra_context={'label' : label, 'cat' : cat, 'blog' : blog},
-                       template_name='archive/entry_list.html')
+                       template_name='archive/entry_list.%s' % template_ext)
+
+def jsonlist(request, cat):
+    markup = "_jsonlist_%s" % cat
+    res = cache.get(markup)
+    if not res:
+        category = CategoryCount.all().filter('category =', cat).get()
+        entry_obj = get_entries(cat, category=category)
+
+        entries = []
+        for e in entry_obj: entries.append({'title' : e.title, 'url' : e.url})
+
+        res = JSONResponse({'entries' : entries})
+        cache.set(markup, res, 1800)
+    return res
 
 def show(request, key):
-    entry = get_object_or_404(Entry, key)
+    return object_detail(request, Entry.all(), key, template_name='archive/entry_detail.html')
 
-    wordcounts = []
-    wordlist = []
-    entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(10)
-
-    #clustering
-    for e in entries:
-        wc = clusters.get_words(e)
-        wordcounts.append(wc)
-        for w in wc.keys():
-            if w not in wordlist: wordlist.append(w)
-
-    words = [[] for i in range(len(wordcounts))]
-
-    i = 0
-    for wc in wordcounts:
-        for word in wordlist:
-            if word in wc: c = float(wc[word])
-            else: c = 0.0
-            words[i].append(c)
-        i += 1
-
-    kcluster = clusters.kcluster(words)
-
-    logging.debug(kcluster)
-
-    return render_to_response(request, 'archive/entry_detail.html',
-                              {'entry' : entry, 'kcluster' : kcluster, 'words' : words})
-
-def get_entries(name, categories=None, limit=10, expire=86400):
+def get_entries(name, categories=None, category=None, limit=10, expire=86400):
     markup = '%s_entries' % name
     entries = cache.get(markup)
 
@@ -92,6 +83,8 @@ def get_entries(name, categories=None, limit=10, expire=86400):
             if categories:
                 cat = get_cat_key(name, categories)
                 entries = entry_obj.filter('cat_ref =', cat)
+            elif category:
+                entries = entry_obj.filter('cat_ref =', category)
             entries = entry_obj.fetch(limit)
             cache.set(markup, entries, expire)
         except:

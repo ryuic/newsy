@@ -5,29 +5,34 @@
 <h1>Entry details</h1>
 
 <p>
-  <a href="{% url feed.views.entry_list key=object.feed_ref.key %}">Back to listing</a> | 
-  <a href="{% url feed.views.entry_edit key=object.key %}">Edit</a> |
-  <a href="{% url feed.views.entry_delete key=object.key %}">Delete</a> |
-  <a href="{% url feed.views.train key=object.key %}">Train this entry.</a>
+  <a href="{% url feed.views.entry_list key=entry.feed_ref.key %}">Back to listing</a> | 
+  <a href="{% url feed.views.entry_edit key=entry.key %}">Edit</a> |
+  <a href="{% url feed.views.entry_delete key=entry.key %}">Delete</a>
 </p>
 
 <ul>
-  <li>Entry Title: <span class="medium bold">{{ object.title }}</span></li>
-  <li>URL: <a href="{{ object.url }}" target="_blank" class="green">{{ object.url }}</a></li>
-  <li>Description: {{ object.description|safe }}</li>
+  <li>Entry Title: <span class="medium bold">{{ entry.title }}</span></li>
+  <li>URL: <a href="{{ entry.url }}" target="_blank" class="green">{{ entry.url }}</a></li>
+  <li>Description: {{ entry.description|safe }}</li>
   <li>
     <ul style="padding:1.2em 1em 0;">
-      {% for wl in object.wordlist_set %}
+      {% for wl in entry.wordlist_set %}
         <li class="bold">{{ wl.word_ref.word }} {{ wl.apcount }} / {{ wl.word_ref.apcount }}</li>
       {% endfor %}
     </ul>
   </li>
 </ul>
 
+<ul>
+ {% for s in similalities %}
+  <li></li>
+ {% endfor %}
+</ul>
+
 
 <ul style="margin:1.2em 0;">
-  <li>Feed Title: <span class="medium bold">{{ object.feed_ref.name }}</span></li>
-  <li>URL: <a href="{% url feed.views.show key=object.feed_ref.key %}" class="green">{{ object.feed_ref.url }}</a></li>
+  <li>Feed Title: <span class="medium bold">{{ entry.feed_ref.name }}</span></li>
+  <li>URL: <a href="{% url feed.views.show key=entry.feed_ref.key %}" class="green">{{ entry.feed_ref.url }}</a></li>
 </ul>
 
 {% endblock %}

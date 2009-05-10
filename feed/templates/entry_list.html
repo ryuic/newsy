@@ -8,12 +8,12 @@
 
 <table class="defaultTable" style="width:100%;">
   <tr>
-   <th style="width:300px;">Title</th>
-   <th>Link</th>
+   <th style="width:400px;">Title</th>
+   <th style="width:85px;">Link</th>
    <th></th>
    <th></th>
-   <th></th>
-   <th></th>
+   <th style="width:85px;"></th>
+   <th style="width:85px;"></th>
   </tr>
   {% for entry in object_list %}
     <tr>
@@ -50,10 +50,10 @@
 
 <div class="pagination">
   {% if has_previous %}
-    <a href="{% url feed.views.entry_list key=key %}?page={{ previous }}">&lt;-previous</a>
+    <a href="{% if key %}{% url feed.views.entry_list key=key %}{% else %}{% url feed.views.entry_list %}{% endif %}?page={{ previous }}">&lt;-previous</a>
   {% endif %}
   {% if has_next %}
-    <a href="{% url feed.views.entry_list key=key %}?page={{ next }}">next-&gt;</a>
+    <a href="{% if key %}{% url feed.views.entry_list key=key %}{% else %}{% url feed.views.entry_list %}{% endif %}?page={{ next }}">next-&gt;</a>
   {% endif %}
 </div>
 {% endblock %}
@@ -88,22 +88,24 @@ $(document).ready(function(){
   });
 
   $('form.untrainForm').submit(function(){
-    if (! confirm('really untrain this entry?')) {
+    if (! confirm('Are you sure to untrain this entry?')) {
        return false;
     }
 
     var $this = $(this);
+
+    $this
+      .find('input:submit').remove().end()
+      .append('untraining...');
+
     $.ajax({
       url : $this.attr('action'),
       type : 'POST',
       dataType : 'json',
-      beforeSend : function(){
-        $this
-          .find('input:submit').remove().end()
-          .append('untraining...');
-      },
       success : function(obj){
-        $this.html('<span class="green">Unrained!</span>');
+        if (typeof obj.success != 'undefined' && obj.success == 1) {
+          $this.html('<span class="green">Unrained!</span>');
+        }
       }
     });
     return false;

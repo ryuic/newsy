@@ -10,8 +10,9 @@
     <div class="article">
       <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
       <div class="articleInfo">
-        {% if not cat %}<a href="{% url archive.views.list cat=e.cat_ref.category %}" class="dark">{{ e.cat_ref.category }}</a>{% endif %}
-        {% if not blog %}<a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a>{% endif %}
+        {% if not cat and e.cat_ref %}<a href="{% url archive.views.list cat=e.cat_ref.category %}" class="dark">{{ e.cat_ref.category }}</a>{% endif %}
+        {% if not blog %}<a href="{% url archive.views.list blog=e.feed_ref.key %}" class="light-grey">{{ e.feed_ref.name }}</a>{% endif %}&nbsp;&nbsp;
+        <span class="grey">{{ e.entrycategory_set|join:", " }}</span>
       </div>
     </div>
   {% endfor %}
