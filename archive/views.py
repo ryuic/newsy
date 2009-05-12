@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from django.core.cache import cache
-from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.template import RequestContext
+from django.views.decorators.cache import cache_page
 from django.views.generic.list_detail import object_list, object_detail
 from feed.models import CategoryCount, Feed, Entry
 from ragendja.dbutils import get_object_or_404
@@ -11,31 +11,28 @@ from ragendja.template import render_to_response, JSONResponse
 from lib import clusters
 import logging
 
+@cache_page(900)
 def index(request):
-    markup = '_index_'
-    res = cache.get(markup)
-    if not res:
-        categories = cache.get('categories')
-        if not categories:
-            categories = CategoryCount.all().fetch(20)
-            cache.set('categories', categories, 864000)
+    categories = cache.get('categories')
+    if not categories:
+        categories = CategoryCount.all().fetch(20)
+        cache.set('categories', categories, 864000)
 
-        payload = {
-          'categories' : categories,
-          'recent_entries' : get_entries('recent', expire=900),
-          'google_entries' : get_entries('Google', categories),
-          'apple_entries' : get_entries('Apple', categories),
-          'microsoft_entries' : get_entries('Microsoft', categories),
-          'web_entries' : get_entries('Web', categories),
-          'gadget_entries' : get_entries('Gadgets', categories),
-          'software_entries' : get_entries('Software', categories),
-          'other_entries' : get_entries('Other', categories),
-        }
+    payload = {
+        'categories' : categories,
+        'recent_entries' : get_entries('recent', expire=900),
+        'google_entries' : get_entries('Google', categories),
+        'apple_entries' : get_entries('Apple', categories),
+        'microsoft_entries' : get_entries('Microsoft', categories),
+        'web_entries' : get_entries('Web', categories),
+        'gadget_entries' : get_entries('Gadgets', categories),
+        'software_entries' : get_entries('Software', categories),
+        'other_entries' : get_entries('Other', categories),
+    }
 
-        res = render_to_response(request, 'archive/index.html',payload)
-        cache.set(markup, res, 900)
-    return res
+    return render_to_response(request, 'archive/index.html',payload)
 
+@cache_page(10)
 def list(request, cat=None, blog=None, label=None):
     entry_obj = Entry.all().order('-created_at')
 
