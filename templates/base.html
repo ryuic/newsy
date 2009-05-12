@@ -27,7 +27,6 @@
       <div id="header">
         <div class="navi">
           {% if user.is_authenticated %}
-            Welcome, {{ user.username }}
             {% if google_user %}<a href="{% google_logout_url "/" %}">
             {% else %}<a href="/account/logout/">{% endif %}Logout</a>
           {% else %}

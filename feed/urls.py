@@ -15,5 +15,7 @@ urlpatterns = patterns('feed.views',
     (r'^entry_train/(?P<key>.+)$', 'train'),
     (r'^entry_untrain/(?P<key>.+)$', 'untrain'),
     (r'^entry_guess/(?P<key>.+)$', 'guess'),
+    (r'^categories/', 'category_list'),
+    (r'^feature/', 'feature_list'),
     (r'^refleshclassifier/$', 'refleshclassifier'),
 )

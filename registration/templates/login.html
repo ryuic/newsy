@@ -4,7 +4,7 @@
 {% block content %}
 <h1>Login</h1>
 <form action="{{ request.get_full_path }}" method="post">
-  <table class="defaultTable">
+  <table class="sessionTable" style="width:320px;">
     {{ form.as_table }}
     <tr>
       <td></td>

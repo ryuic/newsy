@@ -1,0 +1,31 @@
+{% extends 'base_admin.html' %}
+{% block title %}{{ label|default:"Feature" }} listing{% endblock %}
+
+{% block content %}
+<style type="text/css">
+th, td{ padding:6px 7px; }
+th{ text-align:right; }
+</style>
+
+<h1>{{ label|default:"Feature" }} listing</h1>
+
+<table class="defaultTable" style="width:320px;">
+  <tr>
+    <th style="width:40px;">Count</th>
+    <td class="bold">Feature</td>
+  </tr>
+  {% for w, c in wordlist %}
+    <tr>
+      <th class="green">{{ c }}</th>
+      <td>{{ w }}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+$('#container0 table.defaultTable td:even').css('backgroundColor', '#eee');
+</script>
+{% endblock %}

@@ -29,7 +29,6 @@
       <div id="header">
         <div class="navi">
           {% if user.is_authenticated %}
-            Welcome, {{ user.username }}
             {% if google_user %}<a href="{% google_logout_url "/" %}">
             {% else %}<a href="/account/logout/">{% endif %}Logout</a>
             {% if user.is_superuser %}<a href="{% url feed.views.index %}">Meta</a>{% endif %}

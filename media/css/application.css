@@ -238,6 +238,20 @@ table.defaultTable th{
   white-space: nowrap;
 }
 
+table.sessionTable{
+  width: 400px;
+}
+table.sessionTable th, table.sessionTable td{
+  text-align: right;
+  padding:5px 5px 5px 0;
+}
+table.sessionTable input[type="text"], table.sessionTable input[type="password"]{
+  width:200px; height:22px;
+  font-size:20px;
+  line-height:20px;
+}
+
+
 /** trend **/
 ul.trends{
  border:solid 1px #d3d3d3;

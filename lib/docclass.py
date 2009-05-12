@@ -70,7 +70,7 @@ IGNOREWORDS = [
     'your',
 ]
 
-def entryfeatures(entry, wordcount=15):
+def entryfeatures(entry, wordcount=15, tw=False):
     remover = re.compile(r'<[^>]+>')
     splitter = re.compile(r'[^A-Z^a-z]+')
     f = {}
@@ -92,10 +92,9 @@ def entryfeatures(entry, wordcount=15):
         f[w] = 1
 #        if w.isupper(): uc += 1
 #
-#        if i < len(descwords) - 1:
-#            twowords = ' '.join(descwords[i:(i+2)])
-#            f[twowords] = 1
-#
+        if tw and i < len(descwords) - 1:
+            twowords = ' '.join(descwords[i:(i+2)])
+            f[twowords] = 1
 #    if len(descwords) > 0 and float(uc) / len(descwords) > 0.3: f['UPPERCASE'] = 1
     return f
 

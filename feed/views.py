@@ -114,6 +114,33 @@ def entry_delete(request, key):
     return delete_object(request, Entry, object_id=key,
         post_delete_redirect=reverse('feed.views.entry_list'))
 
+def feature_list(request):
+    entries = Entry.all().order('-created_at').fetch(50)
+    feature_counts = [docclass.entryfeatures(e, 50, True) for e in entries]
+
+    wordlist = {}
+    for features in feature_counts:
+        for f, c in features.items():
+            wordlist.setdefault(f, 0)
+            wordlist[f] += c
+
+    wordlist = sorted(wordlist.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
+    return render_to_response(request, 'feed/feature_list.html',
+                              {'wordlist' : wordlist[0:30], 'label' : u'Feature'})
+
+def category_list(request):
+    entries = Entry.all().order('-created_at').fetch(50)
+    
+    wordlist = {}
+    for e in entries:
+        for ec in e.entrycategory_set:
+            wordlist.setdefault(ec.lower_category, 0)
+            wordlist[ec.lower_category] += 1
+
+    wordlist = sorted(wordlist.items(), lambda x, y: cmp(x[1], y[1]), reverse=True)
+    return render_to_response(request, 'feed/feature_list.html',
+                              {'wordlist' : wordlist[0:30], 'label' : u'Category'})
+
 def crawl(request):
     now = datetime.utcnow()
     feed_obj = Feed.all().filter('execute_hour =', now.hour).fetch(50)
