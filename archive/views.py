@@ -13,6 +13,7 @@ import logging
 
 @cache_page(900)
 def index(request):
+    #categories
     categories = cache.get('categories')
     if not categories:
         categories = CategoryCount.all().fetch(20)
@@ -32,7 +33,7 @@ def index(request):
 
     return render_to_response(request, 'archive/index.html',payload)
 
-@cache_page(10)
+@cache_page(900)
 def list(request, cat=None, blog=None, label=None):
     entry_obj = Entry.all().order('-created_at')
 
@@ -41,8 +42,7 @@ def list(request, cat=None, blog=None, label=None):
         if not cat_obj: raise Http404
         entry_obj.filter('cat_ref =', cat_obj)
         label = cat_obj.category
-
-    if blog:
+    elif blog:
         feed_obj = get_object_or_404(Feed, blog)
         entry_obj.filter('feed_ref =', feed_obj)
         label = feed_obj.name

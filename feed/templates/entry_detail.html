@@ -25,7 +25,7 @@
 
 <ul>
  {% for s in similalities %}
-  <li></li>
+   {% ifnotequal s entry %}<li>{{ s.title }}</li>{% endifnotequal %}
  {% endfor %}
 </ul>
 

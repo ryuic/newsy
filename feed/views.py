@@ -12,7 +12,7 @@ from ragendja.template import render_to_response, JSONResponse
 from settings import DEBUG
 from datetime import datetime
 from lib import feedparser, docclass, clusters
-import logging, md5
+import logging, hashlib
 
 
 def index(request):
@@ -71,8 +71,8 @@ def entry_show(request, key):
     #clustering
     wordcounts = []
     wordlist = []
-    words = {}
-    entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(10)
+
+    entries = Entry.all().filter('cat_ref =', entry.cat_ref).order('-created_at').fetch(20)
 
     for e in entries:
         wc = clusters.get_words(e)
@@ -82,13 +82,11 @@ def entry_show(request, key):
 
     words = [[] for i in range(len(wordcounts))]
 
-    i = 0
-    for wc in wordcounts:
+    for i, wc in enumerate(wordcounts):
         for word in wordlist:
             if word in wc: c = float(wc[word])
             else: c = 0.0
             words[i].append(c)
-        i += 1
 
     kcluster = clusters.kcluster(words)
     #logging.debug(kcluster)
@@ -97,10 +95,11 @@ def entry_show(request, key):
     for cluster in kcluster:
         for i, c in enumerate(cluster):
             if entries[c] == entry:
-                similalities = cluster
+                #similalities = cluster
+                similalities = [entries[cl] for cl in cluster]
                 break
+    #logging.debug(similalities)
 
-    #return object_detail(request, Entry.all(), key)
     return render_to_response(request, 'feed/entry_detail.html',
                               {'entry' : entry, 'similalities' : similalities})
 
@@ -159,22 +158,20 @@ def crawl(request):
     classifier.setthreshold('Apple', 2.0)
     classifier.setthreshold('Microsoft', 2.0)
 
-    entries, categories = [], []
-
     for feed in feeds:
         d = feedparser.parse(feed.url)
-        markup = "_crawledurls_%s" % feed.name
+        markup = "_crawledurls_%s" % str(feed.key())
         cached_urls = cache.get(markup, [])
 
         i = 0
-        for e in d.entries[0:5]:
+        for e in d.entries[0:7]:
             try:
-                url_hash = md5.new(e.link).hexdigest()
-
+                url_hash = hashlib.md5(e.link).hexdigest()
                 if url_hash in cached_urls: continue
                 entry = Entry.all().filter('url_hash =', url_hash).get()
                 if entry: continue
 
+                #summary
                 if 'summary' in e: summary = e.summary
                 elif 'description' in e: summary = e.description
                 else: summary = ''
@@ -191,12 +188,10 @@ def crawl(request):
                     processing_time = classifier.get_processingtime()
                     logging.info('processing time >>> %s' % processing_time)
                     entry.cat_ref = classifier.getbestcat()
-                    categories.append(entry.cat_ref)
 
                 entry.save()
-                entries.append(entry)
 
-                if e.categories:
+                if e.has_key('categories'):
                     for c in e.categories:
                         ec = EntryCategory(entry_ref=entry, orig_category=c[1], lower_category=c[1].lower())
                         ec.save()
@@ -209,10 +204,6 @@ def crawl(request):
         #Update cache
         del cached_urls[50:]
         cache.set(markup, cached_urls, 86400)
-
-    #Delete cache
-    cat_set = set(categories)
-    for c in list(cat_set): cache.delete('%s_entries' % c.category)
 
     return HttpResponse()
 
