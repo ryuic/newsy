@@ -11,7 +11,7 @@ from ragendja.template import render_to_response, JSONResponse
 from lib import clusters
 import logging
 
-@cache_page(900)
+#@cache_page(900)
 def index(request):
     #categories
     categories = cache.get('categories')

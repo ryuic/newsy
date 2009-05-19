@@ -88,7 +88,10 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
     <table class="defaultTable">
       <tr>
         <td style="width:33%;" valign="top">
-          <p class="label"><a href="{% url archive.views.list cat="Web" %}">Web</a></p>
+          <p class="label">
+            <a href="{% url archive.views.list cat="Web" %}">Web</a> <a href="#" class="datepickerLink">d</a>
+            <input type="text" style="display:none;" class="datepicker" />
+          </p>
           {% for e in web_entries %}
             <div class="article">
               <div class="title"><a href="{{ e.url }}" class="medium bold" target="_blank" title="{{ e.feed_ref.name }} - {{e.description|striptags|truncatewords:20}}">{{ e.title|safe }}</a></div>
@@ -162,18 +165,20 @@ $(document).ready(function(){
     top: -15, 
     left: 5 
   });
-  
-  $('#topItems p.flabel').hover(
-    function(){
-      $(this).css('backgroundColor', '#eee');
-    },
-    function(){
-      $(this).css('backgroundColor', '#fff');
-    }
-  ).click(function(){
-    location.href = $(this).find('a').attr('href');
+
+  $('#container0 a.datepicker').click(function(){
+    $(this).datepicker('show');
     return false;
   });
+
+  $('#topItems p.flabel')
+    .hover(
+      function(){ $(this).css('backgroundColor', '#eee'); },
+      function(){ $(this).css('backgroundColor', '#fff'); })
+    .click(function(){
+      location.href = $(this).find('a').attr('href');
+      return false;
+    });
 });
 </script>
 {% endblock %}

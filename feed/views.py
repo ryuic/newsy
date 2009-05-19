@@ -158,6 +158,8 @@ def crawl(request):
     classifier.setthreshold('Apple', 2.0)
     classifier.setthreshold('Microsoft', 2.0)
 
+    categories = []
+
     for feed in feeds:
         d = feedparser.parse(feed.url)
         markup = "_crawledurls_%s" % str(feed.key())
@@ -188,6 +190,7 @@ def crawl(request):
                     processing_time = classifier.get_processingtime()
                     logging.info('processing time >>> %s' % processing_time)
                     entry.cat_ref = classifier.getbestcat()
+                    categories.append(entry.cat_ref.category)
 
                 entry.save()
 
@@ -204,6 +207,12 @@ def crawl(request):
         #Update cache
         del cached_urls[50:]
         cache.set(markup, cached_urls, 86400)
+
+    #Delete cache
+    if len(categories) > 0:
+        catset = set(categories)
+        for c in list(catset):
+            cache.delete("%s_entries" % c)
 
     return HttpResponse()
 
