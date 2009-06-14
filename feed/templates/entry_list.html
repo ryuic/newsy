@@ -4,7 +4,10 @@
 {% block content %}
 <h1>Entry listing{% if feed %} | {{ feed.name }}{% endif %}</h1>
 
-<p><a href="{% url feed.views.index %}">Back to listing</a></p>
+<p>
+  <a href="{% url feed.views.index %}">Back to listing</a> |
+  <a href="{% url feed.views.entry_list show="without_category" %}">Show without category</a>
+</p>
 
 <table class="defaultTable" style="width:100%;">
   <tr>

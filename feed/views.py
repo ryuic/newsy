@@ -54,13 +54,15 @@ def delete(request, key):
     return delete_object(request, Feed, object_id=key,
         post_delete_redirect=reverse('feed.views.index'))
 
-def entry_list(request, key=None):
-    payload = {'key' : key}
+def entry_list(request, key=None, show=None):
+    payload = {'key': key}
     entries = Entry.all()
     if key:
         feed = get_object_or_404(Feed, key)
         payload['feed'] = feed
         entries.filter('feed_ref =', feed)
+    if show:
+        entries.filter('cat_ref =', None)
     entries.order('-created_at')
 
     return object_list(request, entries, paginate_by=25, extra_context=payload)
