@@ -7,9 +7,9 @@
   <language>en</language>
   {% for e in object_list %}
   <item>
-  <title><![CDATA[{{ e.title|safe }}]]></title>
+  <title><![CDATA[{{ e.feed_ref.name|safe }} | {{ e.title|safe }}]]></title>
   <link>{{ e.url }}</link>
-  <description><![CDATA[{{ e.description|safe }}]]></description>
+  <description><![CDATA[<p style="color:#008000;">{{ e.entrycategory_set|join:", " }}</p>]]></description>
   {% for c in e.entrycategory_set %}
   <category>{{ c }}</category>
   {% endfor %}
